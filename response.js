@@ -1,6 +1,6 @@
 exports.handler = function (context, event, callback) {
     let twiml = new Twilio.twiml.VoiceResponse();
-    let answers = ["test", "moist", "twilio"];
+    let answers = ["twilio", "test", "moist"];
     let selectedVoice = "alice";
     if (!event.SpeechResult) {
         twiml
@@ -23,11 +23,24 @@ exports.handler = function (context, event, callback) {
             twiml.play({ digits: '6' });
             twiml.hangup();
             console.log("success");
+            sendLog("success!");
         } else {
             twiml.say({ voice: selectedVoice, language: 'en-us' }, 'Wrong Password');
             twiml.hangup();
             console.log("failure");
+            sendLog("failure!");
         }
     }
     callback(null, twiml);
+
+    function sendLog(message){
+        console.log("send log");
+        context.getTwilioClient().messages.create({
+            to: '+XXX',
+            from: '+XXX',
+            body: message,
+          }).then(msg => {
+            callback(null, msg.sid);
+          }).catch(err => callback(err));
+    }
 };
